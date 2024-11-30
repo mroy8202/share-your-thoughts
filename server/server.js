@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const port = process.env.PORT || 4000;
@@ -7,6 +8,9 @@ const port = process.env.PORT || 4000;
 // database connection
 const database = require("./config/database");
 database.connect();
+
+// middlewares
+app.use(cookieParser());
 
 // mount routes
 
