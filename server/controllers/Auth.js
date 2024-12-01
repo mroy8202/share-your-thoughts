@@ -115,3 +115,25 @@ exports.login = async (req, res) => {
     }
 }
 
+// logout
+exports.logout = async (req, res) => {
+    try {
+        // clear the cookie token empty and set an expiry date
+        const options = {
+            expires: new Date(0),
+            httpOnly: true
+        };
+        res.cookie("token", "", options);
+
+        return res.status(200).json({
+            success: true,
+            message: "User logged out successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error occured while logging out"
+        });
+    }
+};
+
