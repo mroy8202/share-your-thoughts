@@ -1,21 +1,20 @@
-// import
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-// route handler
+// Route handler
 const postSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,
-    },
-    body: {
-        type: String,
-        required: true,
-    },
-    postedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-    },
+  title: {
+    type: String,
+    required: true,
+  },
+  body: {
+    type: String,
+    required: true,
+  },
+  postedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
-// export
-module.exports = mongoose.model("Post", postSchema);
+// Export
+export default mongoose.model("Post", postSchema);

@@ -1,41 +1,44 @@
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
-// auth
-exports.auth = async (req, res, next) => {
+// Auth middleware
+export const auth = async (req, res, next) => {
     try {
-        // extract token
-        const token = req.cookies.token || req.body.token || req.header("Authorization").replace("Bearer ", "");
-        
-        // validate token
-        if(!token || token === undefined) {
+        // Extract token
+        const token =
+            req.cookies.token ||
+            req.body.token ||
+            req.header("Authorization")?.replace("Bearer ", "");
+
+        // Validate token presence
+        if (!token) {
             return res.status(400).json({
                 success: false,
-                message: "Token is missing"
+                message: "Token is missing",
             });
         }
 
-        // verify token
+        // Verify token
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            // console.log("Decoded token: ", decoded);
+            // Attach decoded token to request object
             req.user = decoded;
-        }
-        catch(err) {
+        } catch (err) {
             return res.status(400).json({
                 success: false,
                 message: "Token is invalid",
-                err: err.message,
+                error: err.message,
             });
         }
 
+        // Proceed to the next middleware
         next();
-    }
-    catch(error) {
+    } catch (error) {
         return res.status(400).json({
             success: false,
             message: "Something went wrong while validating the token",
-            error: error.message
+            error: error.message,
         });
     }
-}
+};

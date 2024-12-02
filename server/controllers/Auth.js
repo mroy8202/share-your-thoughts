@@ -1,91 +1,92 @@
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const User = require("../models/userModel");
-require("dotenv").config();
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import User from "../models/userModel.js";
+import dotenv from "dotenv";
+dotenv.config();
 
-// signup
-exports.signup = async (req, res) => {
+// Signup
+export const signup = async (req, res) => {
     try {
-        // fetch email, password from the req.body
+        // Fetch email, password, and confirmPassword from req.body
         const { email, password, confirmPassword } = req.body;
 
-        // validate data
-        if(!email || !password || !confirmPassword) {
+        // Validate data
+        if (!email || !password || !confirmPassword) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required",
-            })
+            });
         }
 
-        // check if the user is already registered
-        const registeredUser = await User.findOne({email});
-        if(registeredUser) {
+        // Check if the user is already registered
+        const registeredUser = await User.findOne({ email });
+        if (registeredUser) {
             return res.status(403).json({
                 success: false,
                 message: "User already registered",
-            })
-        } 
+            });
+        }
 
-        // hash password using bcrypt
+        // Hash password using bcrypt
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // create user in database
+        // Create user in the database
         const user = await User.create({
             email,
-            password: hashedPassword
-        })
+            password: hashedPassword,
+        });
 
-        // return a successfull responce
+        // Return a successful response
         return res.status(200).json({
             success: true,
             message: "User registered successfully",
             data: user,
-        })
+        });
     } catch (error) {
-        console.log("error: ", error);
+        console.error("Error:", error);
         return res.status(500).json({
             success: false,
-            message: "User cannot be registered"
+            message: "User cannot be registered",
         });
     }
 };
 
-// login
-exports.login = async (req, res) => {
+// Login
+export const login = async (req, res) => {
     try {
-        // fetch data from req.body
+        // Fetch data from req.body
         const { email, password } = req.body;
 
-        // validate data
-        if(!email || !password) {
+        // Validate data
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "All fields are required"
+                message: "All fields are required",
             });
         }
 
-        // check if user exists or not
-        const registeredUser = await User.findOne({email});
-        if(!registeredUser) {
+        // Check if user exists
+        const registeredUser = await User.findOne({ email });
+        if (!registeredUser) {
             return res.status(400).json({
                 success: false,
-                message: "User is not registered, signup first"
-            });
-        } 
-
-        // match password
-        const isPassWord = await bcrypt.compare(password, registeredUser.password);
-        if(!isPassWord) {
-            return res.status(400).json({
-                success: false,
-                message: "Password do not match"
+                message: "User is not registered, signup first",
             });
         }
 
-        // create jwt token
+        // Match password
+        const isPasswordMatch = await bcrypt.compare(password, registeredUser.password);
+        if (!isPasswordMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "Password does not match",
+            });
+        }
+
+        // Create JWT token
         const payload = {
             id: registeredUser._id,
-            email: registeredUser.email
+            email: registeredUser.email,
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "24h" });
@@ -93,47 +94,44 @@ exports.login = async (req, res) => {
         registeredUser.token = token;
         registeredUser.password = undefined;
 
-        // return a successfull response through cookies
+        // Return a successful response through cookies
         const options = {
-            expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-            httpOnly: true
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            httpOnly: true,
         };
-
-        // console.log("USER: ", registeredUser);
 
         return res.cookie("token", token, options).status(200).json({
             success: true,
-            token: token,
+            token,
             user: registeredUser,
-            message: "User logged in successfully"
+            message: "User logged in successfully",
         });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Error occured while login",
+            message: "Error occurred while login",
         });
     }
-}
+};
 
-// logout
-exports.logout = async (req, res) => {
+// Logout
+export const logout = async (req, res) => {
     try {
-        // clear the cookie token empty and set an expiry date
+        // Clear the cookie token
         const options = {
             expires: new Date(0),
-            httpOnly: true
+            httpOnly: true,
         };
         res.cookie("token", "", options);
 
         return res.status(200).json({
             success: true,
-            message: "User logged out successfully"
+            message: "User logged out successfully",
         });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Error occured while logging out"
+            message: "Error occurred while logging out",
         });
     }
 };
-

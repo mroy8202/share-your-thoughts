@@ -1,17 +1,17 @@
-const express = require("express");
+import express from 'express';
 const app = express();
-const cookieParser = require("cookie-parser");
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+dotenv.config();
 
-const userRoute = require("./routes/UserRoute");
-const postRoute = require("./routes/PostRoute");
-
-require("dotenv").config();
+import userRoute from "./routes/UserRoute.js";
+import postRoute from "./routes/PostRoute.js";
 
 const port = process.env.PORT || 4000;
 
 // database connection
-const database = require("./config/database");
-database.connect();
+import { connect } from './config/database.js';
+connect();
 
 // middlewares
 app.use(express.json());

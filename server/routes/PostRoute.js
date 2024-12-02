@@ -1,16 +1,16 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
-// import controllers
-const { auth } = require("../middlewares/AuthMiddleware");  
-const { createPost, editPost, deletePost, getHomepagePost, getUserPost } = require("../controllers/Post");
+// import 
+import { auth } from "../middlewares/AuthMiddleware.js";
+import { createPost, editPost, deletePost, getHomepagePost, getUserPost } from "../controllers/Post.js";
 
-// route handler
+// Route handlers
 router.post("/createPost", auth, createPost);
 router.delete("/deletePost/:id", auth, deletePost);
 router.put("/editPost/:id", auth, editPost);
 router.get("/getHomepagePost", getHomepagePost);
 router.get("/getUserPost", auth, getUserPost);
 
-// export
-module.exports = router;
+// Export router
+export default router;
