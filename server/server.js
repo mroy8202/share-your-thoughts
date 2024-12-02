@@ -7,7 +7,7 @@ dotenv.config();
 import userRoute from "./routes/UserRoute.js";
 import postRoute from "./routes/PostRoute.js";
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 
 // database connection
 import { connect } from './config/database.js';
