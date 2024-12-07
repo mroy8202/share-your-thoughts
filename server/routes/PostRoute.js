@@ -9,7 +9,7 @@ import { createPost, editPost, deletePost, getHomepagePost, getUserPost } from "
 router.post("/createPost", auth, createPost);
 router.delete("/deletePost/:id", auth, deletePost);
 router.put("/editPost/:id", auth, editPost);
-router.get("/getHomepagePost", getHomepagePost);
+router.get("/getHomepagePost", auth, getHomepagePost);
 router.get("/getUserPost", auth, getUserPost);
 
 // Export router
