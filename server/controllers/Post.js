@@ -1,5 +1,13 @@
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
+import { v2 as cloudinary } from "cloudinary";
+import { uploadImageToCloudinary } from "../utils/imageUploader.js";
+import dotenv from "dotenv";
+dotenv.config();
+
+function isFileTypeSupported(photoType, supportedTypes) {
+    return supportedTypes.includes(photoType);
+}
 
 // Create Post
 export const createPost = async (req, res) => {
@@ -11,21 +19,49 @@ export const createPost = async (req, res) => {
         const { title, body } = req.body;
 
         // Validate details
-        if (!userId) {
+        if(!userId) {
             return res.status(400).json({
                 success: false,
                 message: "User not logged in",
             });
         }
-        if (!title || !body) {
+        if(!title || !body) {
             return res.status(400).json({
                 success: false,
                 message: "Title and body are necessary for creating a blog, please fill all the details",
             });
         }
 
+        let postImage = null;
+        let postImagePublicId = null;
+
+        // Check if an image is provided
+        if(req.files && req.files.postImage) {
+            const photo = req.files.postImage;
+
+            // Validate image type
+            const supportedTypes = ["jpg", "jpeg", "png"];
+            const photoType = photo.name.split(".").pop().toLowerCase();
+
+            if(!isFileTypeSupported(photoType, supportedTypes)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "File format not supported",
+                });
+            }
+
+            // Upload image to Cloudinary
+            const image = await uploadImageToCloudinary(photo, process.env.FOLDER_NAME);
+
+            // Store image details
+            postImage = image.secure_url;
+            postImagePublicId = image.public_id;
+        }
+
         // Create post in database
         const post = await Post.create({
+            postImage,
+            postImagePublicId,
             title,
             body,
             postedBy: userId,
@@ -52,6 +88,7 @@ export const createPost = async (req, res) => {
     }
 };
 
+
 // Edit Post
 export const editPost = async (req, res) => {
     try {
@@ -65,10 +102,10 @@ export const editPost = async (req, res) => {
         const { title, body } = req.body;
 
         // Validate the new details
-        if (!title && !body) {
+        if (!title && !body && !req.files?.postImage) {
             return res.status(400).json({
                 success: false,
-                message: "At least one field (title or body) is required to update the post.",
+                message: "At least one field (title, body, or image) is required to update the post.",
             });
         }
 
@@ -93,8 +130,34 @@ export const editPost = async (req, res) => {
         if (title) post.title = title;
         if (body) post.body = body;
 
-        // Save the updated post to database
-        const updatedPost = await Post.findByIdAndUpdate(postId, { title, body }, { new: true, runValidators: true });
+        // Check and update image if provided
+        if (req.files && req.files.postImage) {
+            const photo = req.files.postImage;
+
+            // Validate image type
+            const supportedTypes = ["jpg", "jpeg", "png"];
+            const photoType = photo.name.split(".").pop().toLowerCase();
+
+            if (!isFileTypeSupported(photoType, supportedTypes)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "File format not supported",
+                });
+            }
+
+            // Delete the old image from Cloudinary
+            if (post.postImagePublicId) {
+                await cloudinary.uploader.destroy(post.postImagePublicId);
+            }
+
+            // Upload the new image to Cloudinary
+            const image = await uploadImageToCloudinary(photo, process.env.FOLDER_NAME);
+            post.postImage = image.secure_url;
+            post.postImagePublicId = image.public_id;
+        }
+
+        // Save the updated post
+        const updatedPost = await post.save();
 
         // Return a successful response
         return res.status(200).json({
@@ -110,48 +173,47 @@ export const editPost = async (req, res) => {
     }
 };
 
+
 // Delete Post
 export const deletePost = async (req, res) => {
     try {
         // Fetch post id from params
         const postId = req.params.id;
 
-        // Fetch post
+        // Fetch the post
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(401).json({
+            return res.status(404).json({
                 success: false,
-                message: "Post could not be found in database with the given post id",
+                message: "Post not found with the given ID",
             });
         }
 
-        // Fetch user
+        // Fetch user ID
         const userId = req.user.id;
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "User is not found with the given user id, User not logged in",
-            });
-        }
 
         // Check if user is authorized to delete the post
         if (userId !== post.postedBy.toString()) {
-            return res.status(401).json({
+            return res.status(403).json({
                 success: false,
-                message: "User is not authorized to delete the post",
+                message: "User is not authorized to delete this post",
             });
         }
 
-        // Delete the post
+        // Delete the image from Cloudinary if it exists
+        if (post.postImagePublicId) {
+            await cloudinary.uploader.destroy(post.postImagePublicId);
+        }
+
+        // Delete the post from the database
         const deletedPost = await Post.findByIdAndDelete(postId);
 
-        // Remove post id from user's schema
+        // Remove post ID from user's schema
         await User.findByIdAndUpdate(userId, {
             $pull: {
                 posts: postId,
             },
-        }, { new: true });
+        });
 
         // Return a successful response
         return res.status(200).json({
@@ -166,6 +228,7 @@ export const deletePost = async (req, res) => {
         });
     }
 };
+
 
 // Get Homepage Post
 export const getHomepagePost = async (req, res) => {

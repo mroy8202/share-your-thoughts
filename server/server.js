@@ -1,6 +1,8 @@
 import express from 'express';
 const app = express();
 import cookieParser from "cookie-parser";
+import fileUpload from 'express-fileupload';
+import { cloudinaryConnect } from './config/cloudinary.js';
 import dotenv from "dotenv";
 import cors from 'cors'
 dotenv.config();
@@ -21,6 +23,13 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(fileUpload({
+    useTempFiles : true,
+    tempFileDir : '/tmp/'
+}));
+
+// connect with cloudinary
+cloudinaryConnect()
 
 // mount routes
 app.use("/api/v1/auth", userRoute);
