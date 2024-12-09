@@ -6,6 +6,7 @@ import PrivateRoute from './components/PrivateRoute'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Homepage from './pages/Homepage'
+import PostDetail from './components/PostDetail'
 
 function App() {
 
@@ -40,6 +41,11 @@ function App() {
               <Homepage />
             </PrivateRoute>
           }
+        />
+
+        {/* Post Detail */}
+        <Route path='/post/:id'
+          element={<PostDetail />}
         />
 
       </Routes>
