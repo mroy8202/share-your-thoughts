@@ -157,22 +157,25 @@ export const editPost = async (req, res) => {
         }
 
         // Save the updated post
-        const updatedPost = await post.save();
+        await post.save();
+
+        // Populate the `postedBy` field before sending the response
+        const populatedPost = await Post.findById(postId).populate("postedBy", "email name");
 
         // Return a successful response
         return res.status(200).json({
             success: true,
             message: "Post updated successfully.",
-            data: updatedPost,
+            data: populatedPost,
         });
     } catch (error) {
+        console.error("Error while updating the post:", error);
         return res.status(500).json({
             success: false,
             message: "Error occurred while updating the post",
         });
     }
 };
-
 
 // Delete Post
 export const deletePost = async (req, res) => {

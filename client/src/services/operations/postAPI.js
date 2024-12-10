@@ -109,3 +109,36 @@ export function deletePost(postId, token, navigate) {
         dispatch(setPostLoading(false))
     }
 }
+
+export function editPost(postId, formData, token, navigate) {
+    return async (dispatch, getState) => {
+        dispatch(setPostLoading(true)); // Start spinner
+        try {
+            const response = await apiConnector("PUT", `${EDIT_POST_API}/${postId}`, formData, {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data", // Handle file uploads
+            });
+
+            if (!response.data.success) {
+                throw new Error(response.data.message);
+            }
+
+            const updatedPost = response.data.data; // Assuming updated post is in response.data.data
+
+            // Update the state with the edited post
+            const { userPosts } = getState().post;
+            const updatedUserPosts = userPosts.map((post) =>
+                post._id === postId ? updatedPost : post
+            );
+            dispatch(setUserPosts(updatedUserPosts));
+
+            toast.success("Post updated successfully");
+            navigate("/user/post");
+        } catch (error) {
+            console.log("Error -> ", error);
+            toast.error("Failed to update post");
+        }
+        dispatch(setPostLoading(false)); // Stop spinner
+    };
+}
+
