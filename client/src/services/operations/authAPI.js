@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 import { authEndpoints } from "../apis"
 import { apiConnector } from "../apiConnector"
 import { setLoading, setToken } from "../../redux/slices/authSlice";
-import { setUser } from "../../redux/slices/postSlice";
+import { setUser, setUserPosts } from "../../redux/slices/postSlice";
 
 // endpoints
 const { SIGNUP_API, LOGIN_API, LOGOUT_API } = authEndpoints
@@ -62,6 +62,7 @@ export function logout(navigate) {
     return async (dispatch) => {
         dispatch(setToken(null));
         dispatch(setUser(null));
+        dispatch(setUserPosts([]));
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         toast.success("Logged Out");

@@ -273,6 +273,7 @@ export const getUserPost = async (req, res) => {
         // Fetch the user along with their posts
         const user = await User.findById(userId).populate({
             path: "posts",
+            populate: {path: "postedBy", select: "email"},
             options: { sort: { createdAt: -1 } }, // Sort posts by newest first
         });
 
@@ -285,8 +286,8 @@ export const getUserPost = async (req, res) => {
 
         // Check if user has any posts
         if (!user.posts || user.posts.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                success: true,
                 message: "No posts found for the user",
             });
         }

@@ -6,7 +6,7 @@ const OpenRoute = ({ children }) => {
   if(token === null) {
     return children;
   } else {
-    return <Navigate to="/user/profile" />
+    return <Navigate to="/user/homepage" />
   }
 }
 

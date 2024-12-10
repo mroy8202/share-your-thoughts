@@ -60,11 +60,6 @@ const Navbar = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/about" className="hover:text-gray-900">
-                    About Us
-                  </Link>
-                </li>
-                <li>
                   <Link to="/user/post" className="hover:text-gray-900">
                     My Posts
                   </Link>

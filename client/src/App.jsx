@@ -7,6 +7,8 @@ import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Homepage from './pages/Homepage'
 import PostDetail from './components/PostDetail'
+import UserPost from './pages/UserPost'
+import ComposeNew from './pages/ComposeNew'
 
 function App() {
 
@@ -45,11 +47,35 @@ function App() {
 
         {/* Post Detail */}
         <Route path='/post/:id'
-          element={<PostDetail />}
+          element={
+          <PrivateRoute>
+            <PostDetail />
+          </PrivateRoute>
+          }
+        />
+
+        {/* My posts */}
+        <Route path='/user/post'
+          element={
+            <PrivateRoute>
+              <UserPost />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Compose New */}
+        <Route path='/user/composeNew'
+          element={
+            <PrivateRoute>
+              <ComposeNew />
+            </PrivateRoute>
+          }
         />
 
       </Routes>
 
+      
+      
       
     </div>
   )

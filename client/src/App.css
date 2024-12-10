@@ -1,3 +1,40 @@
 body {
   overflow-x: hidden;
 }
+
+/* Loader.css */
+
+.overlay {
+  position: fixed; /* Fixes the overlay to the entire screen */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center; /* Centers vertically */
+  z-index: 9999; /* Makes sure the loader is on top of everything */
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px dotted #FFF; /* Dotted white border */
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  animation: rotation 2s linear infinite; /* Spinning animation */
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
