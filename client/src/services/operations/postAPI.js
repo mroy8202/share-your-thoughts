@@ -2,6 +2,7 @@ import toast from "react-hot-toast";
 import { postEndpoints } from "../apis";
 import { apiConnector } from "../apiConnector";
 import { setHomepagePosts, setPostLoading, setUserPosts } from "../../redux/slices/postSlice";
+import { useSelector } from "react-redux";
 
 
 // endpoints
@@ -77,6 +78,33 @@ export function composeNewBlog(formData, token, navigate) {
         } catch (error) {
             console.log("Error: ", error);
             toast.error("cannot create post");
+        }
+        dispatch(setPostLoading(false))
+    }
+}
+
+export function deletePost(postId, token, navigate) {
+    return async (dispatch, getState) => {
+        dispatch(setPostLoading(true))
+        try {
+            const response = await apiConnector("DELETE", `${DELETE_POST_API}/${postId}`, null, {
+                Authorization: `Bearer ${token}`,
+            })
+
+            if(!response.data.success) {
+                throw new Error(response.data.message);
+            }
+
+            // todo: update the user's post, so that the deleted one will not appear
+            const { userPosts } = getState().post;
+            const updatedUserPosts = userPosts.filter(post => post._id !== postId);
+            dispatch(setUserPosts(updatedUserPosts));
+
+            toast.success("Post Deleted Successfully")
+            navigate("/user/post")
+        } catch (error) {
+            console.log("Error -> ", error)
+            toast.error("Error while deleting post")
         }
         dispatch(setPostLoading(false))
     }

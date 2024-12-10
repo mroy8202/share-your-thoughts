@@ -11,7 +11,7 @@ const UserPost = () => {
 
     useEffect(() => {
         dispatch(getUserPost(token))
-    }, [dispatch, token])
+    }, [dispatch, token,])
 
   return (
     <div className="w-full p-5 bg-gray-100">

@@ -1,13 +1,25 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom"; // Import Link from react-router-dom
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Import Link from react-router-dom
 import noThumbnail from "../assets/noThumbnail.png";
+import { deletePost } from "../services/operations/postAPI";
+import { useDispatch, useSelector } from "react-redux";
 
 const Post = ({ post, currentUserEmail }) => {
-  const location = useLocation()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { token } = useSelector((state) => state.auth);
+
+  const DeleteButtonHandler = (e) => {
+    e.stopPropagation(); // Prevent navigation when the delete button is clicked
+    const postId = post._id;
+    dispatch(deletePost(postId, token, navigate)); // Call delete action
+  };
 
   return (
     <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow">
-      {/* Wrapping the whole card in Link for navigation */}
+      {/* Wrapping the post image and content in Link for navigation */}
       <Link 
         to={`/post/${post._id}`} 
         state={post} // Pass post data to PostDetail via state
@@ -42,30 +54,30 @@ const Post = ({ post, currentUserEmail }) => {
           <div className="text-sm text-gray-600 mb-3">
             Posted By: <span className="font-medium text-gray-900">{post?.postedBy?.email}</span>
           </div>
-
-          {/* Button Container */}
-          {currentUserEmail === post?.postedBy?.email && location.pathname === "/user/post" && (
-            <div className="flex space-x-2">
-              {/* Edit button */}
-              <button 
-                type="button" 
-                className="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5"
-              >
-                Edit
-              </button>
-
-              {/* Delete button */}
-              <button 
-                type="button" 
-                className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5"
-              >
-                Delete
-              </button>
-            </div>
-          )}
-          
         </div>
       </Link>
+
+      {/* Button Container */}
+      {currentUserEmail === post?.postedBy?.email && location.pathname === "/user/post" && (
+        <div className="flex space-x-2 px-5 pb-5">
+          {/* Edit button */}
+          <button 
+            type="button" 
+            className="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5"
+          >
+            Edit
+          </button>
+
+          {/* Delete button */}
+          <button 
+            type="button"
+            onClick={DeleteButtonHandler} // Call the delete handler
+            className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5"
+          >
+            Delete
+          </button>
+        </div>
+      )}
     </div>
   );
 };
