@@ -73,10 +73,6 @@ function App() {
         />
 
       </Routes>
-
-      
-      
-      
     </div>
   )
 }

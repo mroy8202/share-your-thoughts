@@ -60,6 +60,7 @@ export function login({ email, password }, navigate) {
 
 export function logout(navigate) {
     return async (dispatch) => {
+        dispatch(setLoading(true));
         dispatch(setToken(null));
         dispatch(setUser(null));
         dispatch(setUserPosts([]));
@@ -67,5 +68,6 @@ export function logout(navigate) {
         localStorage.removeItem("user");
         toast.success("Logged Out");
         navigate("/login");
+        dispatch(setLoading(false));
     };
 }
