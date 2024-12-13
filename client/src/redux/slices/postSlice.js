@@ -6,6 +6,7 @@ const initialState = {
     postLoading: false,
     homepagePosts: [],
     userPosts: [],
+    totalPages: 0
 };
 
 // create slice
@@ -25,9 +26,12 @@ const postSlice = createSlice({
         setUserPosts(state, value) {
             state.userPosts = value.payload;
         },
+        setTotalPages(state, value) {
+            state.totalPages = value.payload;
+        }
     }
 })
 
-export const { setUser, setPostLoading, setHomepagePosts, setUserPosts } = postSlice.actions;
+export const { setUser, setPostLoading, setHomepagePosts, setUserPosts, setTotalPages } = postSlice.actions;
 
 export default postSlice.reducer;

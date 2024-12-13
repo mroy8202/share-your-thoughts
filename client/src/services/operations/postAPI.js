@@ -1,28 +1,35 @@
 import toast from "react-hot-toast";
 import { postEndpoints } from "../apis";
 import { apiConnector } from "../apiConnector";
-import { setHomepagePosts, setPostLoading, setUserPosts } from "../../redux/slices/postSlice";
-import { useSelector } from "react-redux";
+import { setHomepagePosts, setPostLoading, setTotalPages, setUserPosts } from "../../redux/slices/postSlice";
 
 
 // endpoints
 const { CREATE_POST_API, DELETE_POST_API, EDIT_POST_API, HOMEPAGE_POST_API, USER_POST_API } = postEndpoints
 
-export function getHomepagePost(token) {
-    return async(dispatch) => {
+export function getHomepagePost(token, pageNo) {
+    return async(dispatch, getState) => {
         dispatch(setPostLoading(true))
         try {
-            const response = await apiConnector("GET", HOMEPAGE_POST_API, null, {
+            const response = await apiConnector("GET", `${HOMEPAGE_POST_API}?page=${pageNo}&limit=8`, null, {
                 Authorization: `Bearer ${token}`
             })
 
-            // console.log("HOMEPAGE POST API RESPONSE: ", response?.data?.data.posts);
+            // console.log("HOMEPAGE POST API RESPONSE: ", response?.data?.data);
             if (!response.data.success) {
                 throw new Error(response.data.message)
             }
 
-            const allPosts = response.data.data.posts
-            await dispatch(setHomepagePosts(allPosts))
+            const isTotalPageDataAvailable = getState().post.totalPages;
+            if(isTotalPageDataAvailable === 0) {
+                dispatch(setTotalPages(response?.data?.data?.totalPages))
+            }
+
+            const newPosts = response?.data?.data?.posts
+            const existingPosts = getState().post.homepagePosts
+            const updatedPosts = [...existingPosts, ...newPosts]
+            // console.log("updated posts: ", updatedPosts)
+            await dispatch(setHomepagePosts(updatedPosts))
 
             // toast.success("homepage")
         } catch (error) {

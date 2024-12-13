@@ -237,7 +237,7 @@ export const deletePost = async (req, res) => {
 export const getHomepagePost = async (req, res) => {
     try {
         // Optional: Implement pagination and sorting
-        const { page = 1, limit = 10 } = req.query;
+        const { page = 1, limit = 8 } = req.query;
 
         // Fetch all posts with pagination, sorting by newest first
         const posts = await Post.find()

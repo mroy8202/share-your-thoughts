@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 import { authEndpoints } from "../apis"
 import { apiConnector } from "../apiConnector"
 import { setLoading, setToken } from "../../redux/slices/authSlice";
-import { setUser, setUserPosts } from "../../redux/slices/postSlice";
+import { setHomepagePosts, setUser, setUserPosts } from "../../redux/slices/postSlice";
 
 // endpoints
 const { SIGNUP_API, LOGIN_API, LOGOUT_API } = authEndpoints
@@ -13,7 +13,7 @@ export function signup({ email, password, confirmPassword }, navigate) {
         try {
             const response = await apiConnector("POST", SIGNUP_API, {email, password, confirmPassword})
 
-            console.log("SIGNUP API RESPONSE -> ", response )
+            // console.log("SIGNUP API RESPONSE -> ", response )
 
             if(!response.data.success) {
                 throw new Error(response.data.message) // if response if false, an error is thrown with the server's error message.
@@ -36,7 +36,7 @@ export function login({ email, password }, navigate) {
         try {
             const response = await apiConnector("POST", LOGIN_API, { email, password })
 
-            console.log("Login Api Response -> ", response)
+            // console.log("Login Api Response -> ", response)
             if(!response.data.success) {
                 throw new Error(response.data.message)
             }
@@ -60,13 +60,16 @@ export function login({ email, password }, navigate) {
 
 export function logout(navigate) {
     return async (dispatch) => {
+        const response = await apiConnector("POST", LOGOUT_API)
+        // console.log("response: ", response)
         dispatch(setLoading(true));
         dispatch(setToken(null));
         dispatch(setUser(null));
         dispatch(setUserPosts([]));
+        dispatch(setHomepagePosts([]));
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        toast.success("Logged Out");
+        toast.success(response.data.message);
         navigate("/login");
         dispatch(setLoading(false));
     };
