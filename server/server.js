@@ -18,7 +18,7 @@ connect();
 
 // middlewares
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://share-your-thoughts-frontend.vercel.app/'],
     // credentials: true,
 }));
 app.use(express.json());
