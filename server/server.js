@@ -1,49 +1,56 @@
 import express from 'express';
-const app = express();
 import cookieParser from "cookie-parser";
 import fileUpload from 'express-fileupload';
-import { cloudinaryConnect } from './config/cloudinary.js';
 import dotenv from "dotenv";
-import cors from 'cors'
-dotenv.config();
+import cors from 'cors';
 
+import { connect } from './config/database.js';
+import { cloudinaryConnect } from './config/cloudinary.js';
 import userRoute from "./routes/UserRoute.js";
 import postRoute from "./routes/PostRoute.js";
 
+dotenv.config();
+const app = express();
 const port = process.env.PORT || 3000;
 
-// database connection
-import { connect } from './config/database.js';
+// Database connection
 connect();
 
-// middlewares
+// Middlewares
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://share-your-thoughts-frontend.vercel.app'],
+    origin: [
+        'http://localhost:5173',
+        'https://share-your-thoughts-frontend.vercel.app'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+app.options('*', cors()); // Handle preflight requests
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(fileUpload({
-    useTempFiles : true,
-    tempFileDir : '/tmp/'
+    useTempFiles: true,
+    tempFileDir: '/tmp/'
 }));
 
-// connect with cloudinary
-cloudinaryConnect()
+// Cloudinary connection
+cloudinaryConnect();
 
-// mount routes
+// Routes
 app.use("/api/v1/auth", userRoute);
-app.use("/api/v1/post", postRoute)
+app.use("/api/v1/post", postRoute);
 
-// default route
+// Default route
 app.get("/", (req, res) => {
     return res.json({
         success: true,
         message: "Welcome to default route"
-    })
+    });
 });
 
-// activate server
+// Activate server
 app.listen(port, () => {
-    console.log(`App is running at port: ${port}`)
+    console.log(`App is running at port: ${port}`);
 });
